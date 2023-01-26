@@ -1,0 +1,65 @@
+# ---- Actualizar MikroTik ----
+# -----------------------------
+
+# Buscar la actualización:
+system package update check-for-updates
+# Descargar la actualización:
+system package update download
+# Reiniciar MikroTik
+system reboot
+
+# ---- Asignar nombre a las interfaces ----
+# -----------------------------------------
+
+# Obtenemos la lista de interfaces
+interface print
+# Debemos anotar el nombre o el identificador de las interfaces que deseamos renombrar
+# Para renombrar la interfaz utilizando ID (interfaz número 0 para que se llame newName)
+interface set 0 name=newName
+# para renombrar utilizando nombre (interfaz oldName para que se llame newName)
+interface set oldName name=newName
+
+# ---- Asignar una IP a las interfaces ----
+# -----------------------------------------
+
+# Para borrar una IP, por ejemplo la que sale en la lista como 0
+ip address print
+ip address remove 0
+# Para quitar un cliente dhcp existente, por ejemplo 0
+ip dhcp-client print
+ip dhcp-client remove 0
+# En caso de una IP dinámica (en la interfaz WAN):
+ip dhcp-client add interfaz=WAN disabled=no
+# Para una IP estática (vamos con 10.0.3.203/24 en la interfaz WAN)
+ip address add address=10.0.3.203/24 interface=WAN
+# En este caso añadimos ruta por defecto (a través de 10.0.3.1)
+ip route add dst-address 0.0.0.0/0 gateway=10.0.3.1
+
+# ---- Crear un servidor DHCP ----
+# --------------------------------
+
+# si hubiese que quitar una configuración previa
+# listamos los dhcp servers y borramos por id
+# borramos el servidor
+ip dhcp-server print
+ip dhcp-server remove 0
+# listamos y borramos el pool
+ip pool print
+ip pool remove 0
+# hay que tener configurada la IP para nuestra interfaz de antemano
+ip dhcp-server setup
+# después seguir las instrucciones
+
+# ---- Activar Source NAT (masquerade) ----
+# -----------------------------------------
+
+# asumimos que la interfaz pública se llama WAN
+ip firewall nat add chain=srcnat action=masquerade out-interface=WAN
+
+# ---- Activar Destination NAT (apertura de puertos) ----
+# -------------------------------------------------------
+
+# asumimos que queremos redirigir el puerto 8080 en el MikroTik al puerto 80 en el equipo 192.168.0.100
+ip firewall nat add chain=dstnat dst-port=8080 action=dst-nat protocol=tcp to-address=192.168.0.100 to-port=80
+
+
