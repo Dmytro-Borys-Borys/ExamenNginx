@@ -60,7 +60,7 @@ ip firewall nat add chain=srcnat action=masquerade out-interface=WAN
 # -------------------------------------------------------
 
 # asumimos que queremos redirigir el puerto 8080 en el MikroTik al puerto 80 en el equipo 192.168.0.100
-ip firewall nat add chain=dstnat dst-port=8080 action=dst-nat protocol=tcp to-address=192.168.0.100 to-port=80
+ip firewall nat add chain=dstnat dst-port=8080 action=dst-nat protocol=tcp in-interface=WAN to-address=192.168.0.100 to-port=80
 
 # ---- añadir concesión estática de DHCP ----
 # -------------------------------------------
